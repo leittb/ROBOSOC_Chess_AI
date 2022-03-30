@@ -1,6 +1,8 @@
 import chess
+import chess.polyglot
 import tables
 import util
+import sys
 
 class AI_AlphaBeta:
 
@@ -13,12 +15,14 @@ class AI_AlphaBeta:
 
     def get_move(self, board, depth):
 
+        #self.test_openings(board)
+
         best_eval = -self.INFINITE
         self.boards_evaluated = 0
 
         moves = list(board.legal_moves)
-        print(moves)
-        moves = self.order_moves(board, moves)
+        # print(moves)
+        # moves = self.order_moves(board, moves)
 
         for move in board.legal_moves:
             board.push(move)
@@ -30,7 +34,7 @@ class AI_AlphaBeta:
                 best_move = move
 
             board.pop()
-        print(self.boards_evaluated)
+        #print(self.boards_evaluated)
         return best_move
 
     def alphabeta(self, board, depth, alpha, beta):
@@ -63,7 +67,7 @@ class AI_AlphaBeta:
 
         for i in range(64):
             piece = board.piece_at(i)
-            if (piece != None and piece.piece_type != 6):
+            if (piece != None):
                 if (piece.color == board.turn):
                     eval += self.PIECE_VALUES[piece.piece_type]
                     eval += tables.PIECE_TABLE[piece.piece_type][int(i/8)][i%8]
@@ -72,6 +76,11 @@ class AI_AlphaBeta:
                     eval -= tables.PIECE_TABLE[piece.piece_type][int(i/8)][i%8]
 
         return eval
+
+    def test_openings(self, board):
+        with chess.polyglot.open_reader("data/polyglot/performance.bin") as reader:
+            for entry in reader.find_all(board):
+                print(entry.move, entry.weight, entry.learn)
 
     def order_moves(self, board, moves):
 
@@ -87,3 +96,14 @@ class AI_AlphaBeta:
             move_scores.append(score)      
 
         return util.bubble_sort(moves, move_scores)
+
+# #main
+# try:
+#     fen = sys.argv[1]
+#     depth = sys.argv[2]
+#     board = chess.Board(fen)
+#     ai = AI_AlphaBeta()
+#     print(ai.get_move())
+
+# except:
+#     print("Invalid argumants")
